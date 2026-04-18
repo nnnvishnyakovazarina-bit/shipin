@@ -1,0 +1,32 @@
+name: Build APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - release
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build leanback release APK
+        run: ./gradlew assembleLeanbackRelease
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: leanback-arm64_v8a
+          path: app/build/outputs/apk/leanback/release/*.apk
