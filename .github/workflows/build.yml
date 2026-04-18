@@ -27,10 +27,20 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
 
+      - name: Decode keystore
+        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > app/release.jks
+
+      - name: Create local.properties
+        run: |
+          echo "storeFile=release.jks" >> local.properties
+          echo "storePassword=${{ secrets.STORE_PASSWORD }}" >> local.properties
+          echo "keyAlias=shipin" >> local.properties
+          echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> local.properties
+
       - name: Build APK
-        run: ./gradlew assembleLeanbackRelease
+        run: ./gradlew assemble${{ github.event.inputs.flavor }}Release
 
       - uses: actions/upload-artifact@v4
         with:
-          name: leanback-arm64_v8a
-          path: app/build/outputs/apk/leanback/release/*.apk
+          name: apk-${{ github.event.inputs.flavor }}
+          path: app/build/outputs/apk/**/release/*.apk
